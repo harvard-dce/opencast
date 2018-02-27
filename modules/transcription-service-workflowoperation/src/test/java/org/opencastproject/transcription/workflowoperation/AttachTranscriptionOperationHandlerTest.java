@@ -113,7 +113,9 @@ public class AttachTranscriptionOperationHandlerTest {
     service = EasyMock.createStrictMock(TranscriptionService.class);
 
     EasyMock.expect(service.getGeneratedTranscription("mpId1", "transcriptionJob")).andReturn(catalog);
+    EasyMock.expect(service.getLanguage()).andReturn("en").once();
     EasyMock.expect(service.getGeneratedTranscription("mpId2", "transcriptionJob")).andReturn(attachment);
+    EasyMock.expect(service.getLanguage()).andReturn("en").once();
     EasyMock.replay(service);
 
     // Caption service set up

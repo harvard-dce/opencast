@@ -121,7 +121,7 @@ public class AttachTranscriptionOperationHandler extends AbstractWorkflowOperati
 
       // If caption format passed, convert to desired format
       if (captionFormatOption != null) {
-        Job job = captionService.convert(transcription, "ibm-watson", captionFormatOption, "en");
+        Job job = captionService.convert(transcription, "ibm-watson", captionFormatOption, service.getLanguage());
         if (!waitForStatus(job).isSuccess()) {
           throw new WorkflowOperationException("Transcription format conversion job did not complete successfully");
         }
