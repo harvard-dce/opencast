@@ -32,8 +32,9 @@ Example
     <!-- This is filled out by the transcription service when starting this workflow so just use this as is -->
     <configuration key="transcription-job-id">${transcriptionJobId}</configuration>
     <configuration key="target-tag">archive</configuration>
-    <!-- Caption generated will have the default flavor based on the target-caption-format and language: captions/vtt+en -->
+    <!-- Caption generated will have the default flavor based on the target-caption-format and language e.g. captions/vtt+en -->
     <configuration key="target-caption-format">vtt</configuration>
+    <configuration key="target-tag">engage-download</configuration>    
   </configurations>
 </operation>
 
@@ -43,7 +44,7 @@ Example
   exception-handler-workflow="partial-error"
   description="Distribute and publish to engage server">
   <configurations>
-    <configuration key="download-source-flavors">captions/vtt+en</configuration>
+    <configuration key="download-source-tags">engage-download</configuration>
     <configuration key="strategy">merge</configuration>
     <configuration key="check-availability">true</configuration>
   </configurations>
