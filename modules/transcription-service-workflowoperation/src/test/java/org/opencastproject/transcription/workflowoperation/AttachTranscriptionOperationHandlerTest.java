@@ -162,7 +162,7 @@ public class AttachTranscriptionOperationHandlerTest {
     Assert.assertEquals(Action.CONTINUE, result.getAction());
 
     MediaPackage updatedMp = result.getMediaPackage();
-    Attachment[] attachments = updatedMp.getAttachments(MediaPackageElementFlavor.parseFlavor("captions/dfxp"));
+    Attachment[] attachments = updatedMp.getAttachments(MediaPackageElementFlavor.parseFlavor("captions/dfxp+en"));
 
     Assert.assertNotNull(attachments);
     Assert.assertEquals(1, attachments.length);
@@ -188,7 +188,7 @@ public class AttachTranscriptionOperationHandlerTest {
     Assert.assertEquals(Action.CONTINUE, result.getAction());
 
     MediaPackage updatedMp = result.getMediaPackage();
-    Attachment[] attachments = updatedMp.getAttachments(MediaPackageElementFlavor.parseFlavor("captions/vtt"));
+    Attachment[] attachments = updatedMp.getAttachments(MediaPackageElementFlavor.parseFlavor("captions/vtt+en"));
 
     Assert.assertNotNull(attachments);
     Assert.assertEquals(1, attachments.length);
