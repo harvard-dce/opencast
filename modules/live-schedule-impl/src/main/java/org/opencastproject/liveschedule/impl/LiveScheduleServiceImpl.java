@@ -558,7 +558,7 @@ public class LiveScheduleServiceImpl implements LiveScheduleService {
 
   MediaPackage addAndDistributeElements(Snapshot snapshot) throws LiveScheduleException {
     try {
-      MediaPackage mp = snapshot.getMediaPackage();
+      MediaPackage mp = (MediaPackage) snapshot.getMediaPackage().clone();
 
       Set<String> elementIds = new HashSet<String>();
       // Then, add series catalog if needed
