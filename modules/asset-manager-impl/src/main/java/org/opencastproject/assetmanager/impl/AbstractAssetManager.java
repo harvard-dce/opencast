@@ -23,10 +23,10 @@ package org.opencastproject.assetmanager.impl;
 import static com.entwinemedia.fn.Prelude.chuck;
 import static com.entwinemedia.fn.Stream.$;
 import static java.lang.String.format;
-import static org.opencastproject.mediapackage.MediaPackageSupport.getFileName;
-import static org.opencastproject.mediapackage.MediaPackageSupport.getMediaPackageElementId;
 import static org.opencastproject.mediapackage.MediaPackageSupport.Filters.hasNoChecksum;
 import static org.opencastproject.mediapackage.MediaPackageSupport.Filters.isNotPublication;
+import static org.opencastproject.mediapackage.MediaPackageSupport.getFileName;
+import static org.opencastproject.mediapackage.MediaPackageSupport.getMediaPackageElementId;
 
 import org.opencastproject.assetmanager.api.Asset;
 import org.opencastproject.assetmanager.api.AssetId;
