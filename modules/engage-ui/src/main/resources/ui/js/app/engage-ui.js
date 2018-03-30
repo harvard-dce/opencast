@@ -701,8 +701,11 @@ function($, bootbox, _, alertify) {
                             	// Is event in progress?
                             	var start = new Date(data.mediapackage.start);
                             	var end = new Date(start.getTime() + parseInt (data.mediapackage.duration));
-                            	var now = new Date(); 
-                                if (now < start || now > end) {
+                            	var now = new Date();
+                            	console.log("start: " + start + ", end:" + end + ", now: " + now);
+                            	console.log("now < start? " + (now < start));
+                            	console.log("now > end? " + (now > end));
+                            	if (now < start || now > end) {
                                 	live = msg_live_not_in_progress;
                                 	canLaunch = false;
                                 } else live = msg_live_in_progress;
