@@ -823,23 +823,19 @@ public class IndexServiceImpl implements IndexService {
     MetadataCollection eventMetadata = eventHttpServletRequest.getMetadataList().get()
             .getMetadataByAdapter(eventCatalogUIAdapter).get();
 
+    Date currentStartDate = null;
     JSONObject sourceMetadata = (JSONObject) eventHttpServletRequest.getSource().get().get("metadata");
     if (sourceMetadata != null
             && (type.equals(SourceType.SCHEDULE_SINGLE) || type.equals(SourceType.SCHEDULE_MULTIPLE))) {
       try {
         MetadataField<?> current = eventMetadata.getOutputFields().get("location");
         eventMetadata.updateStringField(current, (String) sourceMetadata.get("device"));
+        org.joda.time.DateTime now = new org.joda.time.DateTime(DateTimeZone.UTC);
+        currentStartDate = new Date(DateTimeSupport.fromUTC((String) sourceMetadata.get("start")));
       } catch (Exception e) {
         logger.warn("Unable to parse device {}", sourceMetadata.get("device"));
         throw new IllegalArgumentException("Unable to parse device");
       }
-    }
-
-    Date currentStartDate = null;
-    MetadataField<?> starttime = eventMetadata.getOutputFields().get(DublinCore.PROPERTY_TEMPORAL.getLocalName());
-    if (starttime != null && starttime.isUpdated() && starttime.getValue().isSome()) {
-      DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod((DublinCoreValue)starttime.getValue().get());
-      currentStartDate = period.getStart();
     }
 
     MetadataField<?> created = eventMetadata.getOutputFields().get(DublinCore.PROPERTY_CREATED.getLocalName());
