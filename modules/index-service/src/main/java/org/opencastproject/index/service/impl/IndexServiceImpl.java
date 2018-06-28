@@ -818,6 +818,10 @@ public class IndexServiceImpl implements IndexService {
     MetadataCollection eventMetadata = eventHttpServletRequest.getMetadataList().get()
             .getMetadataByAdapter(eventCatalogUIAdapter).get();
 
+    org.joda.time.DateTime start = null;
+    org.joda.time.DateTime end = null;
+    long duration = 0L;
+
     JSONObject sourceMetadata = (JSONObject) eventHttpServletRequest.getSource().get().get("metadata");
     if (sourceMetadata != null
             && (type.equals(SourceType.SCHEDULE_SINGLE) || type.equals(SourceType.SCHEDULE_MULTIPLE))) {
@@ -828,6 +832,15 @@ public class IndexServiceImpl implements IndexService {
         logger.warn("Unable to parse device {}", sourceMetadata.get("device"));
         throw new IllegalArgumentException("Unable to parse device");
       }
+
+      String durationString = (String) sourceMetadata.get("duration");
+      if (StringUtils.isBlank(durationString))
+        throw new IllegalArgumentException("No duration in source metadata");
+
+      org.joda.time.DateTime now = new org.joda.time.DateTime(DateTimeZone.UTC);
+      start = now.withMillis(DateTimeSupport.fromUTC((String) sourceMetadata.get("start")));
+      end = now.withMillis(DateTimeSupport.fromUTC((String) sourceMetadata.get("end")));
+      duration = Long.parseLong(durationString);
     }
 
     Date currentStartDate = null;
@@ -835,6 +848,8 @@ public class IndexServiceImpl implements IndexService {
     if (starttime != null && starttime.isUpdated() && starttime.getValue().isSome()) {
       DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod((DublinCoreValue)starttime.getValue().get());
       currentStartDate = period.getStart();
+    } else if (start != null) {
+      currentStartDate = start.toDate();
     }
 
     MetadataField<?> created = eventMetadata.getOutputFields().get(DublinCore.PROPERTY_CREATED.getLocalName());
@@ -863,9 +878,6 @@ public class IndexServiceImpl implements IndexService {
     DublinCoreCatalog dc = getDublinCoreCatalog(eventHttpServletRequest);
     String captureAgentId = null;
     TimeZone tz = null;
-    org.joda.time.DateTime start = null;
-    org.joda.time.DateTime end = null;
-    long duration = 0L;
     Properties caProperties = new Properties();
     RRule rRule = null;
     if (sourceMetadata != null
@@ -879,10 +891,6 @@ public class IndexServiceImpl implements IndexService {
         throw new IllegalArgumentException("Unable to parse device");
       }
 
-      String durationString = (String) sourceMetadata.get("duration");
-      if (StringUtils.isBlank(durationString))
-        throw new IllegalArgumentException("No duration in source metadata");
-
       // Create timezone based on CA's reported TZ.
       String agentTimeZone = configuration.getProperty("capture.device.timezone");
       if (StringUtils.isNotBlank(agentTimeZone)) {
@@ -894,10 +902,6 @@ public class IndexServiceImpl implements IndexService {
                 "The field 'capture.device.timezone' has not been set in the agent configuration. The default server timezone will be used.");
       }
 
-      org.joda.time.DateTime now = new org.joda.time.DateTime(DateTimeZone.UTC);
-      start = now.withMillis(DateTimeSupport.fromUTC((String) sourceMetadata.get("start")));
-      end = now.withMillis(DateTimeSupport.fromUTC((String) sourceMetadata.get("end")));
-      duration = Long.parseLong(durationString);
       DublinCoreValue period = EncodingSchemeUtils
               .encodePeriod(new DCMIPeriod(start.toDate(), start.plus(duration).toDate()), Precision.Second);
       String inputs = (String) sourceMetadata.get("inputs");
