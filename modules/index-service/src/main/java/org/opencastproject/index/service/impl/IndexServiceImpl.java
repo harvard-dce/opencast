@@ -850,19 +850,19 @@ public class IndexServiceImpl implements IndexService {
       currentStartDate = period.getStart();
     } else if (start != null) {
       currentStartDate = start.toDate();
+    } else {
+      currentStartDate = new Date();
     }
+    eventHttpServletRequest.getMediaPackage().get().setDate(currentStartDate);
 
     MetadataField<?> created = eventMetadata.getOutputFields().get(DublinCore.PROPERTY_CREATED.getLocalName());
     if (created == null || !created.isUpdated() || created.getValue().isNone()) {
       eventMetadata.removeField(created);
       MetadataField<String> newCreated = MetadataUtils.copyMetadataField(created);
-      if (currentStartDate != null) {
-        newCreated.setValue(EncodingSchemeUtils.encodeDate(currentStartDate, Precision.Second).getValue());
-      } else {
-        newCreated.setValue(EncodingSchemeUtils.encodeDate(new Date(), Precision.Second).getValue());
-      }
+      newCreated.setValue(EncodingSchemeUtils.encodeDate(currentStartDate, Precision.Second).getValue());
       eventMetadata.addField(newCreated);
     }
+
 
     // Get presenter usernames for use as technical presenters
     Set<String> presenterUsernames = new HashSet<>();
