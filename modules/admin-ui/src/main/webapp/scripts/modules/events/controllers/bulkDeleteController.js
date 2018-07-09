@@ -29,11 +29,13 @@ angular.module('adminNg.controllers')
 
     var hasPublishedElements = function (currentEvent) {
         var publicationCount = 0;
-        angular.forEach(currentEvent.publications, function() {
+        angular.forEach(currentEvent.publications, function(pub) {
             publicationCount++;
         });
 
-        if (publicationCount > 0) {
+        if (publicationCount == 1 && currentEvent.publications[0].id == "engage-live") {
+        	return false;
+        } else if (publicationCount > 0) {
             return true;
         } else {
             return false;
