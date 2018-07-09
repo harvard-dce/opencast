@@ -79,8 +79,7 @@ public class SchedulerUpdateHandler extends UpdateHandler {
           break;
         case Delete:
         case DeleteRecordingStatus:
-          if (isLive(mpId))
-            liveScheduleService.deleteLiveEvent(mpId);
+          liveScheduleService.deleteLiveEvent(mpId);
           break;
         case UpdateAgentId:
         case UpdateStart:
