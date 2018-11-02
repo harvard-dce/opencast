@@ -43,6 +43,8 @@ import junitparams.JUnitParamsRunner;
 @RunWith(JUnitParamsRunner.class)
 public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStorageAssetManagerTest<AbstractAssetManagerWithTieredStorage> {
 
+  // #DCE OPC-146 Many places: added boolean spawnSubJobs to make it possible to execute in sequence.
+
   private TieredStorageAssetManagerJobProducer tsamjp = null;
   private ServiceRegistry sr = null;
 
@@ -69,20 +71,20 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     createIdExpectation(mp[0]);
     EasyMock.replay(sr);
 
-    tsamjp.moveById(mp[0], REMOTE_STORE_1_ID);
+    tsamjp.moveById(mp[0], REMOTE_STORE_1_ID, true);
 
     EasyMock.verify(sr);
   }
 
   @Test
-  public void testInternalById() throws ServiceRegistryException {
+  public void testInternalById() throws ServiceRegistryException, NotFoundException {
     String[] mp = createAndAddMediaPackagesSimple(2, 2, 2, Opt.<String>none());
     //Because this is the internal check, this is an id-and-version check since it's the terminal phase (ie, post process())
     createIdAndVersionExpectation(mp[1], 0, 2);
     EasyMock.replay(sr);
 
     Assert.assertEquals("Both versions should move",
-            "2", tsamjp.internalMoveById(mp[1], REMOTE_STORE_1_ID));
+            "2", tsamjp.internalMoveById(mp[1], REMOTE_STORE_1_ID, true));
     EasyMock.verify(sr);
   }
 
@@ -150,7 +152,7 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     createDateExpectation(start, end);
     EasyMock.replay(sr);
 
-    tsamjp.moveByDate(start, end, REMOTE_STORE_1_ID);
+    tsamjp.moveByDate(start, end, REMOTE_STORE_1_ID, true);
 
     EasyMock.verify(sr);
   }
@@ -170,11 +172,11 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     EasyMock.replay(sr);
 
     Assert.assertEquals("No versions exist between the start and before test values",
-            "0", tsamjp.internalMoveByDate(start, before, REMOTE_STORE_1_ID));
+            "0", tsamjp.internalMoveByDate(start, before, REMOTE_STORE_1_ID, true));
     Assert.assertEquals("All four versions should move",
-            "4", tsamjp.internalMoveByDate(before, after, REMOTE_STORE_1_ID));
+            "4", tsamjp.internalMoveByDate(before, after, REMOTE_STORE_1_ID, true));
     Assert.assertEquals("No versions exist after the end date",
-            "0", tsamjp.internalMoveByDate(after, new Date(), REMOTE_STORE_1_ID));
+            "0", tsamjp.internalMoveByDate(after, new Date(), REMOTE_STORE_1_ID, true));
     EasyMock.verify(sr);
   }
 
@@ -202,7 +204,7 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     createIdAndDateExpectation(mp[0], start, end);
     EasyMock.replay(sr);
 
-    tsamjp.moveByIdAndDate(mp[0], start, end, REMOTE_STORE_1_ID);
+    tsamjp.moveByIdAndDate(mp[0], start, end, REMOTE_STORE_1_ID, true);
 
     EasyMock.verify(sr);
   }
@@ -218,11 +220,11 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     EasyMock.replay(sr);
 
     Assert.assertEquals("No versions exist between the start and before test values",
-            "0", tsamjp.internalMoveByIdAndDate("fake", start, before, REMOTE_STORE_1_ID));
+            "0", tsamjp.internalMoveByIdAndDate("fake", start, before, REMOTE_STORE_1_ID, true));
     Assert.assertEquals("Both versions of " + mp[1] + " should move",
-            "2", tsamjp.internalMoveByIdAndDate(mp[1], before, after, REMOTE_STORE_1_ID));
+            "2", tsamjp.internalMoveByIdAndDate(mp[1], before, after, REMOTE_STORE_1_ID, true));
     Assert.assertEquals("No versions of " + mp[1] + " should move",
-            "0", tsamjp.internalMoveByIdAndDate(mp[1], after, new Date(), REMOTE_STORE_1_ID));
+            "0", tsamjp.internalMoveByIdAndDate(mp[1], after, new Date(), REMOTE_STORE_1_ID, true));
     EasyMock.verify(sr);
   }
 
@@ -243,6 +245,7 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     List<String> args = new LinkedList<String>();
     args.add(REMOTE_STORE_1_ID);
     args.add(mpId);
+    args.add("true");
     createExpectation(TieredStorageAssetManagerJobProducer.Operation.MoveById.toString(), args, TieredStorageAssetManagerJobProducer.NONTERMINAL_JOB_LOAD);
     return createTriggerJob(args, TieredStorageAssetManagerJobProducer.NONTERMINAL_JOB_LOAD);
   }
@@ -265,6 +268,7 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     args.add(REMOTE_STORE_1_ID);
     args.add(Long.toString(start.getTime()));
     args.add(Long.toString(end.getTime()));
+    args.add("true");
     createExpectation(TieredStorageAssetManagerJobProducer.Operation.MoveByDate.toString(), args, TieredStorageAssetManagerJobProducer.NONTERMINAL_JOB_LOAD);
   }
 
@@ -274,6 +278,7 @@ public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStor
     args.add(mpId);
     args.add(Long.toString(start.getTime()));
     args.add(Long.toString(end.getTime()));
+    args.add("true");
     createExpectation(TieredStorageAssetManagerJobProducer.Operation.MoveByIdAndDate.toString(), args, TieredStorageAssetManagerJobProducer.NONTERMINAL_JOB_LOAD);
   }
 

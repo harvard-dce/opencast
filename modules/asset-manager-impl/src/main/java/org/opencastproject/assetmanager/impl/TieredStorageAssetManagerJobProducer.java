@@ -49,6 +49,8 @@ import java.util.function.Consumer;
 
 public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
 
+  // #DCE OPC-146 Many places: added boolean spawnSubJobs to make it possible to execute in sequence.
+
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(TieredStorageAssetManagerJobProducer.class);
 
@@ -99,12 +101,14 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
     VersionImpl version;
     Date start;
     Date end;
+    boolean spawnSubJobs;
     try {
       op = Operation.valueOf(operation);
       switch (op) {
         case MoveById:
           id = arguments.get(1);
-          return internalMoveById(id, targetStore);
+          spawnSubJobs = Boolean.parseBoolean(arguments.get(2));
+          return internalMoveById(id, targetStore, spawnSubJobs);
         case MoveByIdAndVersion:
           id = arguments.get(1);
           version = VersionImpl.mk(Long.parseLong(arguments.get(2)));
@@ -112,12 +116,14 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
         case MoveByDate:
           start = new Date(Long.parseLong(arguments.get(1)));
           end = new Date(Long.parseLong(arguments.get(2)));
-          return internalMoveByDate(start, end, targetStore);
+          spawnSubJobs = Boolean.parseBoolean(arguments.get(3));
+          return internalMoveByDate(start, end, targetStore, spawnSubJobs);
         case MoveByIdAndDate:
           id = arguments.get(1);
           start = new Date(Long.parseLong(arguments.get(2)));
           end = new Date(Long.parseLong(arguments.get(3)));
-          return internalMoveByIdAndDate(id, start, end, targetStore);
+          spawnSubJobs = Boolean.parseBoolean(arguments.get(4));
+          return internalMoveByIdAndDate(id, start, end, targetStore, spawnSubJobs);
         default:
           throw new IllegalArgumentException("Unknown operation '" + operation + "'");
       }
@@ -178,18 +184,22 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
    * Spawns a job to move a all snapshots of a mediapackage from their current storage to a new target storage location
    *
    * @param mpId
-   *  The mediapackage ID of the snapshot to move
+   *          The mediapackage ID of the snapshot to move
    * @param targetStorage
-   *  The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be moved
-   * @return
-   *  The {@link Job}
+   *          The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be
+   *          moved
+   * @param spawnSubJobs
+   *          If this job should create one job for each id and version to run in parallel. If false, it will run
+   *          sequentially.
+   * @return The {@link Job}
    */
-  public Job moveById(final String mpId, final String targetStorage) {
+  public Job moveById(final String mpId, final String targetStorage, final boolean spawnSubJobs) {
     RequireUtil.notEmpty(mpId, "mpId");
     RequireUtil.notEmpty(targetStorage, "targetStorage");
     List<String> args = new LinkedList<String>();
     args.add(targetStorage);
     args.add(mpId);
+    args.add(Boolean.toString(spawnSubJobs));
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.MoveById.toString(), args, null, true, NONTERMINAL_JOB_LOAD);
@@ -199,35 +209,49 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
   }
 
   /**
-   * Spawns subjobs on a per-snapshot level to move the appropriate snapshots to their new home
+   * Moves the appropriate snapshots to their new home. If spawnSubJobs is true, spawn sub-jobs on a per-snapshot level
+   * to move them.
    *
    * @param mpId
-   *  The mediapackage ID of the snapshot to move
+   *          The mediapackage ID of the snapshot to move
    * @param targetStorage
-   *  The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be moved
-   * @return
-   *  The number of subjobs spawned
+   *          The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be
+   *          moved
+   * @param spawnSubJobs
+   *          Indicates if sub-jobs should be spawned to execute in parallel.
+   * @return The number of subjobs spawned
    */
-  protected String internalMoveById(final String mpId, final String targetStorage) {
-    RichAResult results = tsam.getSnapshotsById(mpId);
-    List<Job> subjobs = spawnSubjobs(results, targetStorage);
-    return Integer.toString(subjobs.size());
+  protected String internalMoveById(final String mpId, final String targetStorage, final boolean spawnSubJobs)
+          throws NotFoundException {
+    // #DCE OPC-146 We don't want to execute in parallel
+    if (spawnSubJobs) {
+      RichAResult results = tsam.getSnapshotsById(mpId);
+      List<Job> subjobs = spawnSubjobs(results, targetStorage);
+      return Integer.toString(subjobs.size());
+    } else {
+      tsam.moveSnapshotsById(mpId, targetStorage);
+      return OK;
+    }
   }
 
 
   /**
-   * Spawns a job to move a all snapshots taken between two points from their current storage to a new target storage location
+   * Spawns a job to move a all snapshots taken between two points from their current storage to a new target storage
+   * location
    *
    * @param start
-   *  The start {@link Date}
+   *          The start {@link Date}
    * @param end
-   *  The end {@link Date}
+   *          The end {@link Date}
    * @param targetStorage
-   *  The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be moved
-   * @return
-   *  The {@link Job}
+   *          The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be
+   *          moved
+   * @param spawnSubJobs
+   *          If this job should create one job for each id and version to run in parallel. If false, it will run
+   *          sequentially.
+   * @return The {@link Job}
    */
-  public Job moveByDate(final Date start, final Date end, final String targetStorage) {
+  public Job moveByDate(final Date start, final Date end, final String targetStorage, final boolean spawnSubJobs) {
     RequireUtil.notNull(start, "start");
     RequireUtil.notNull(end, "end");
     RequireUtil.notNull(targetStorage, "targetStorage");
@@ -235,6 +259,7 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
     args.add(targetStorage);
     args.add(Long.toString(start.getTime()));
     args.add(Long.toString(end.getTime()));
+    args.add(Boolean.toString(spawnSubJobs));
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.MoveByDate.toString(), args, null, true, NONTERMINAL_JOB_LOAD);
@@ -244,38 +269,54 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
   }
 
   /**
-   * Spawns subjobs on a per-snapshot level to move the appropriate snapshots to their new home
+   * Moves the appropriate snapshots to their new home. If spawnSubJobs is true, spawn sub-jobs on a per-snapshot level
+   * to move them.
    *
    * @param start
-   *  The start {@link Date}
+   *          The start {@link Date}
    * @param end
-   *  The end {@link Date}
+   *          The end {@link Date}
    * @param targetStorage
-   *  The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be moved
-   * @return
-   *  The number of subjobs spawned
+   *          The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be
+   *          moved
+   * @param spawnSubJobs
+   *          Indicates if sub-jobs should be spawned to execute in parallel.
+   * @return The number of subjobs spawned
    */
-  protected String internalMoveByDate(final Date start, final Date end, final String targetStorage) {
-    RichAResult results = tsam.getSnapshotsByDate(start, end);
-    List<Job> subjobs = spawnSubjobs(results, targetStorage);
-    return Integer.toString(subjobs.size());
+  protected String internalMoveByDate(final Date start, final Date end, final String targetStorage,
+          final boolean spawnSubJobs)
+          throws NotFoundException {
+    // #DCE OPC-146 We don't want to execute in parallel
+    if (spawnSubJobs) {
+      RichAResult results = tsam.getSnapshotsByDate(start, end);
+      List<Job> subjobs = spawnSubjobs(results, targetStorage);
+      return Integer.toString(subjobs.size());
+    } else {
+      tsam.moveSnapshotsByDate(start, end, targetStorage);
+      return OK;
+    }
   }
 
   /**
-   * Spawns a job to move a all snapshots of a given mediapackage taken between two points from their current storage to a new target storage location
+   * Spawns a job to move a all snapshots of a given mediapackage taken between two points from their current storage to
+   * a new target storage location
    *
    * @param mpId
-   *  The mediapackage ID of the snapshot to move
+   *          The mediapackage ID of the snapshot to move
    * @param start
-   *  The start {@link Date}
+   *          The start {@link Date}
    * @param end
-   *  The end {@link Date}
+   *          The end {@link Date}
    * @param targetStorage
-   *  The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be moved
-   * @return
-   *  The {@link Job}
+   *          The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be
+   *          moved
+   * @param spawnSubJobs
+   *          If this job should create one job for each id and version to run in parallel. If false, it will run
+   *          sequentially.
+   * @return The {@link Job}
    */
-  public Job moveByIdAndDate(final String mpId, final Date start, final Date end, final String targetStorage) {
+  public Job moveByIdAndDate(final String mpId, final Date start, final Date end, final String targetStorage,
+          final boolean spawnSubJobs) {
     RequireUtil.notNull(mpId, "mpId");
     RequireUtil.notNull(start, "start");
     RequireUtil.notNull(end, "end");
@@ -285,6 +326,7 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
     args.add(mpId);
     args.add(Long.toString(start.getTime()));
     args.add(Long.toString(end.getTime()));
+    args.add(Boolean.toString(spawnSubJobs));
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.MoveByIdAndDate.toString(), args, null, true, NONTERMINAL_JOB_LOAD);
@@ -294,23 +336,33 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
   }
 
   /**
-   * Spawns subjobs on a per-snapshot level to move the appropriate snapshots to their new home
+   * Moves the appropriate snapshots to their new home. If spawnSubJobs is true, spawn sub-jobs on a per-snapshot level
+   * to move them.
    *
    * @param mpId
-   *  The mediapackage ID of the snapshot to move
+   *          The mediapackage ID of the snapshot to move
    * @param start
-   *  The start {@link Date}
+   *          The start {@link Date}
    * @param end
-   *  The end {@link Date}
+   *          The end {@link Date}
    * @param targetStorage
-   *  The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be moved
-   * @return
-   *  The number of subjobs spawned
+   *          The {@link org.opencastproject.assetmanager.impl.storage.RemoteAssetStore} ID where the snapshot should be
+   *          moved
+   * @param spawnSubJobs
+   *          Indicates if sub-jobs should be spawned to execute in parallel.
+   * @return The number of sub-jobs spawned
    */
-  protected String internalMoveByIdAndDate(final String mpId, final Date start, final Date end, final String targetStorage) {
-    RichAResult results = tsam.getSnapshotsByIdAndDate(mpId, start, end);
-    List<Job> subjobs = spawnSubjobs(results, targetStorage);
-    return Integer.toString(subjobs.size());
+  protected String internalMoveByIdAndDate(final String mpId, final Date start, final Date end,
+          final String targetStorage, final boolean spawnSubJobs) throws NotFoundException {
+    // #DCE OPC-146 We don't want to execute in parallel
+    if (spawnSubJobs) {
+      RichAResult results = tsam.getSnapshotsByIdAndDate(mpId, start, end);
+      List<Job> subjobs = spawnSubjobs(results, targetStorage);
+      return Integer.toString(subjobs.size());
+    } else {
+      tsam.moveSnapshotsByIdAndDate(mpId, start, end, targetStorage);
+    return OK;
+    }
   }
 
   /**

@@ -57,7 +57,6 @@ public class TimedMediaArchiver extends AbstractScanner implements ManagedServic
   public static final String TRIGGER_NAME = "oc-asset-manager-timed-media-archiver-trigger";
 
   private TieredStorageAssetManager assetManager;
-  private WorkflowService workflowService;
   private String storeId;
   private long ageModifier;
 

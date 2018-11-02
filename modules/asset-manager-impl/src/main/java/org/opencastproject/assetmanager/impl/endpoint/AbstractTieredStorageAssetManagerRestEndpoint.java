@@ -51,6 +51,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends AbstractAssetManagerRestEndpoint {
+
+  // #DCE OPC-146 Many places: added boolean spawnSubJobs to make it possible to execute in sequence.
+
   public static final String SDF_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
   protected TieredStorageAssetManagerJobProducer tsamjp = null;
@@ -96,7 +99,8 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
                           isRequired = true,
                           type = RestParameter.Type.STRING,
                           defaultValue = "",
-                          description = "The target storage to move the mediapackage to.")},
+                          description = "The target storage to move the mediapackage to."),
+                  @RestParameter(name = "spawnSubJobs", isRequired = false, type = RestParameter.Type.BOOLEAN, defaultValue = "true", description = "If a job for each id and version should run in parallel. If false, it will move snapshots sequentially.") },
           reponses = {
                   @RestResponse(
                           description = "The job created to move the snapshot.",
@@ -108,7 +112,8 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
                           description = "There has been an internal error, and the job was not created",
                           responseCode = SC_INTERNAL_SERVER_ERROR)},
           returnDescription = "The Job created")
-  public Response moveById(@FormParam("id") final String id, @FormParam("target") final String target) {
+  public Response moveById(@FormParam("id") final String id, @FormParam("target") final String target,
+          @FormParam("spawnJobs") final boolean spawnSubJobs) {
     String mpid = StringUtils.trimToNull(id);
     if (null == mpid) {
       return badRequest("Invalid mediapackage ID: " + mpid);
@@ -122,7 +127,7 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
     }
 
     try {
-      Job j = tsamjp.moveById(mpid, trimmedTarget);
+      Job j = tsamjp.moveById(mpid, trimmedTarget, spawnSubJobs);
       return Response.ok(new JaxbJob(j)).build();
     } catch (Exception e) {
       return handleException(e);
@@ -214,7 +219,8 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
                           isRequired = true,
                           type = RestParameter.Type.STRING,
                           defaultValue = "",
-                          description = "The target storage to move the mediapackage to.")},
+                          description = "The target storage to move the mediapackage to."),
+                  @RestParameter(name = "spawnSubJobs", isRequired = false, type = RestParameter.Type.BOOLEAN, defaultValue = "true", description = "If a job for each id and version should run in parallel. If false, it will move snapshots sequentially.") },
           reponses = {
                   @RestResponse(
                           description = "The job created to move the snapshots.",
@@ -226,7 +232,8 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
                           description = "There has been an internal error, and the job was not created",
                           responseCode = SC_INTERNAL_SERVER_ERROR)},
           returnDescription = "The Job created")
-  public Response moveByDate(@FormParam("start") final String startString, @FormParam("end") final String endString, @FormParam("target") final String target) {
+  public Response moveByDate(@FormParam("start") final String startString, @FormParam("end") final String endString,
+          @FormParam("target") final String target, @FormParam("spawnJobs") final boolean spawnSubJobs) {
     DateFormat sdf = new SimpleDateFormat(SDF_FORMAT);
     Date start;
     Date end;
@@ -248,12 +255,22 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
       return badRequest("Target store " + trimmedTarget + " not found");
     }
 
+<<<<<<< HEAD
     try {
       Job j = tsamjp.moveByDate(start, end, trimmedTarget);
       return ok(new JaxbJob(j));
     } catch (Exception e) {
       return handleException(e);
     }
+=======
+    return handleException(new P1Lazy<Response>() {
+      @Override
+      public Response get1() {
+        Job j = tsamjp.moveByDate(start, end, trimmedTarget, spawnSubJobs);
+        return ok(new JaxbJob(j));
+      }
+    });
+>>>>>>> 028248d... OPC-146-s3-archive Added option to run archives in sequence so that we
   }
 
   @POST
@@ -284,7 +301,8 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
                           isRequired = true,
                           type = RestParameter.Type.STRING,
                           defaultValue = "",
-                          description = "The target storage to move the mediapackage to.")},
+                          description = "The target storage to move the mediapackage to."),
+                  @RestParameter(name = "spawnSubJobs", isRequired = false, type = RestParameter.Type.BOOLEAN, defaultValue = "true", description = "If a job for each id and version should run in parallel. If false, it will move snapshots sequentially.") },
           reponses = {
                   @RestResponse(
                           description = "The job created to move the snapshots.",
@@ -296,7 +314,9 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
                           description = "There has been an internal error, and the job was not created",
                           responseCode = SC_INTERNAL_SERVER_ERROR)},
           returnDescription = "The Job created")
-  public Response moveByIdAndDate(@FormParam("id") final String id, @FormParam("start") final String startString, @FormParam("end") final String endString, @FormParam("target") final String target) {
+  public Response moveByIdAndDate(@FormParam("id") final String id, @FormParam("start") final String startString,
+          @FormParam("end") final String endString, @FormParam("target") final String target,
+          @FormParam("spawnSubJobs") final boolean spawnSubJobs) {
     DateFormat sdf = new SimpleDateFormat(SDF_FORMAT);
     final String mpid = StringUtils.trimToNull(id);
     if (null == mpid) {
@@ -323,11 +343,21 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
       return badRequest("Target store " + trimmedTarget + " not found");
     }
 
+<<<<<<< HEAD
     try {
       Job j = tsamjp.moveByIdAndDate(mpid, start, end, trimmedTarget);
       return ok(new JaxbJob(j));
     } catch (Exception e) {
       return handleException(e);
     }
+=======
+    return handleException(new P1Lazy<Response>() {
+      @Override
+      public Response get1() {
+        Job j = tsamjp.moveByIdAndDate(mpid, start, end, trimmedTarget, spawnSubJobs);
+        return ok(new JaxbJob(j));
+      }
+    });
+>>>>>>> 028248d... OPC-146-s3-archive Added option to run archives in sequence so that we
   }
 }
