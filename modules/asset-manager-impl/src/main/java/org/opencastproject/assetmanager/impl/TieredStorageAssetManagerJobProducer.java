@@ -49,8 +49,6 @@ import java.util.function.Consumer;
 
 public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
 
-  // #DCE OPC-146 Many places: added boolean spawnSubJobs to make it possible to execute in sequence.
-
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(TieredStorageAssetManagerJobProducer.class);
 
@@ -223,7 +221,6 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
    */
   protected String internalMoveById(final String mpId, final String targetStorage, final boolean spawnSubJobs)
           throws NotFoundException {
-    // #DCE OPC-146 We don't want to execute in parallel
     if (spawnSubJobs) {
       RichAResult results = tsam.getSnapshotsById(mpId);
       List<Job> subjobs = spawnSubjobs(results, targetStorage);
@@ -286,7 +283,6 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
   protected String internalMoveByDate(final Date start, final Date end, final String targetStorage,
           final boolean spawnSubJobs)
           throws NotFoundException {
-    // #DCE OPC-146 We don't want to execute in parallel
     if (spawnSubJobs) {
       RichAResult results = tsam.getSnapshotsByDate(start, end);
       List<Job> subjobs = spawnSubjobs(results, targetStorage);
@@ -354,7 +350,6 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer {
    */
   protected String internalMoveByIdAndDate(final String mpId, final Date start, final Date end,
           final String targetStorage, final boolean spawnSubJobs) throws NotFoundException {
-    // #DCE OPC-146 We don't want to execute in parallel
     if (spawnSubJobs) {
       RichAResult results = tsam.getSnapshotsByIdAndDate(mpId, start, end);
       List<Job> subjobs = spawnSubjobs(results, targetStorage);

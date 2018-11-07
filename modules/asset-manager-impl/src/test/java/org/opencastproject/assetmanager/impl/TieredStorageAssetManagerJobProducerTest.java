@@ -43,8 +43,6 @@ import junitparams.JUnitParamsRunner;
 @RunWith(JUnitParamsRunner.class)
 public class TieredStorageAssetManagerJobProducerTest extends AbstractTieredStorageAssetManagerTest<AbstractAssetManagerWithTieredStorage> {
 
-  // #DCE OPC-146 Many places: added boolean spawnSubJobs to make it possible to execute in sequence.
-
   private TieredStorageAssetManagerJobProducer tsamjp = null;
   private ServiceRegistry sr = null;
 

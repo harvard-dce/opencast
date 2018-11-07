@@ -52,8 +52,6 @@ import javax.ws.rs.core.Response;
 
 public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends AbstractAssetManagerRestEndpoint {
 
-  // #DCE OPC-146 Many places: added boolean spawnSubJobs to make it possible to execute in sequence.
-
   public static final String SDF_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
   protected TieredStorageAssetManagerJobProducer tsamjp = null;
@@ -255,22 +253,12 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
       return badRequest("Target store " + trimmedTarget + " not found");
     }
 
-<<<<<<< HEAD
     try {
-      Job j = tsamjp.moveByDate(start, end, trimmedTarget);
+      Job j = tsamjp.moveByDate(start, end, trimmedTarget, spawnSubJobs);
       return ok(new JaxbJob(j));
     } catch (Exception e) {
       return handleException(e);
     }
-=======
-    return handleException(new P1Lazy<Response>() {
-      @Override
-      public Response get1() {
-        Job j = tsamjp.moveByDate(start, end, trimmedTarget, spawnSubJobs);
-        return ok(new JaxbJob(j));
-      }
-    });
->>>>>>> 028248d... OPC-146-s3-archive Added option to run archives in sequence so that we
   }
 
   @POST
@@ -343,21 +331,11 @@ public abstract class AbstractTieredStorageAssetManagerRestEndpoint extends Abst
       return badRequest("Target store " + trimmedTarget + " not found");
     }
 
-<<<<<<< HEAD
     try {
-      Job j = tsamjp.moveByIdAndDate(mpid, start, end, trimmedTarget);
+      Job j = tsamjp.moveByIdAndDate(mpid, start, end, trimmedTarget, spwnSubJobs);
       return ok(new JaxbJob(j));
     } catch (Exception e) {
       return handleException(e);
     }
-=======
-    return handleException(new P1Lazy<Response>() {
-      @Override
-      public Response get1() {
-        Job j = tsamjp.moveByIdAndDate(mpid, start, end, trimmedTarget, spawnSubJobs);
-        return ok(new JaxbJob(j));
-      }
-    });
->>>>>>> 028248d... OPC-146-s3-archive Added option to run archives in sequence so that we
   }
 }
