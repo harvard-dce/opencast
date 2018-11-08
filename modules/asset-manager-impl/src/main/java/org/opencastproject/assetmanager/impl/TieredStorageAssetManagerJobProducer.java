@@ -59,7 +59,7 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer im
   public static final Float JOB_LOAD = 0.1f;
   public static final Float NONTERMINAL_JOB_LOAD = 0.1f;
 
-  // #DCE OPC-146 Configuration option to determine if transfers among asset stores will spawn
+  // Configuration option to determine if transfers among asset stores will spawn
   // sub-jobs to run in parallel or execute moves in sequence
   public static final String PARAM_KEY_SPAWN_SUB_JOBS = "spawnSubJobsForParallelRun";
   private boolean spawnSubJobs = true;
@@ -94,7 +94,6 @@ public class TieredStorageAssetManagerJobProducer extends AbstractJobProducer im
 
   @Override
   public void updated(Dictionary<String, ?> properties) {
-    // #DCE OPC-146
     if (properties.get(PARAM_KEY_SPAWN_SUB_JOBS) != null) {
       spawnSubJobs = BooleanUtils.toBoolean((String) properties.get(PARAM_KEY_SPAWN_SUB_JOBS));
     } else {
