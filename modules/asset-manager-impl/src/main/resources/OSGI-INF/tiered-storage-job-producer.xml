@@ -7,6 +7,7 @@
   <implementation class="org.opencastproject.assetmanager.impl.TieredStorageAssetManagerJobProducer"/>
   <property name="service.description" value="Opencast Asset Manager Job Producer"/>
   <service>
+   	<provide interface="org.osgi.service.cm.ManagedService" /> 
     <provide interface="org.opencastproject.assetmanager.impl.TieredStorageAssetManagerJobProducer"/>
   </service>
 
