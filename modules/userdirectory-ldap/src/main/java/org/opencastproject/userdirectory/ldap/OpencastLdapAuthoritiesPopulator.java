@@ -36,8 +36,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,6 +54,9 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
   public static final String ROLE_CLEAN_REPLACEMENT = "_";
 
   private Set<String> attributeNames;
+  // #DCE OPC-66-users-groups
+  private DefaultLdapAuthoritiesPopulator defAuthPopulator;
+  // #DCE
   private String[] additionalAuthorities;
   private String prefix = "";
   private Set<String> excludedPrefixes = new HashSet<>();
@@ -63,15 +69,18 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
   /**
    * Activate component
    */
+  // #DCE OPC-66 Added contextSource, groupBase, groupSearchFilter
   public OpencastLdapAuthoritiesPopulator(String attributeNames, String prefix, String[] aExcludedPrefixes,
           boolean uppercase, Organization organization, SecurityService securityService,
-          JpaGroupRoleProvider groupRoleProvider, String... additionalAuthorities) {
+          JpaGroupRoleProvider groupRoleProvider, DefaultSpringSecurityContextSource contextSource,
+          String groupSearchBase, String groupSearchFilter, String... additionalAuthorities) {
 
     debug("Creating new instance");
+    // #DCE OPC-191
+    logger.info("Activating  {}", getClass().getName());
 
-    if (attributeNames == null) {
-      throw new IllegalArgumentException("The attribute list cannot be null");
-    }
+    // #DCE OPC-66 Removed check for null attributes
+    // throw new IllegalArgumentException("The attribute list cannot be null");
 
     if (securityService == null) {
       throw new IllegalArgumentException("The security service cannot be null");
@@ -84,21 +93,37 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
     this.organization = organization;
 
     this.attributeNames = new HashSet<>();
-    for (String attributeName : attributeNames.split(",")) {
-      String temp = attributeName.trim();
-      if (!temp.isEmpty())
-        this.attributeNames.add(temp);
-    }
-    if (this.attributeNames.size() == 0) {
-      throw new IllegalArgumentException("At least one valid attribute must be provided");
-    }
+    if (StringUtils.isNotBlank(attributeNames)) {
+      for (String attributeName : attributeNames.split(",")) {
+        String temp = attributeName.trim();
+        if (!temp.isEmpty())
+          this.attributeNames.add(temp);
+      }
+      // #DCE OPC-66
+      // if (this.attributeNames.size() == 0) {
+      // throw new IllegalArgumentException("At least one valid attribute must be provided");
+      // }
 
-    if (logger.isDebugEnabled()) {
-      debug("Roles will be read from the LDAP attributes:");
-      for (String attribute : this.attributeNames) {
-        logger.debug("\t* {}", attribute);
+      if (logger.isDebugEnabled() && this.attributeNames.size() > 0) {
+        debug("Roles will be read from the LDAP attributes:");
+        for (String attribute : this.attributeNames) {
+          logger.debug("\t* {}", attribute);
+        }
       }
     }
+
+    // #DCE OPC-66 Use DefaultAuthoritiesPopulator
+    else if (StringUtils.isNotBlank(groupSearchBase)) {
+      defAuthPopulator = new DefaultLdapAuthoritiesPopulator(contextSource, groupSearchBase);
+      if (StringUtils.isNotBlank(groupSearchFilter))
+        defAuthPopulator.setGroupSearchFilter(groupSearchFilter);
+      defAuthPopulator.setSearchSubtree(true);
+      defAuthPopulator.setRolePrefix(prefix);
+      logger.info(
+              "Using DefaultLdapAuthoritiesPopulator to get user groups. Group search base: {}, group search filter: {}",
+              groupSearchBase, groupSearchFilter);
+    } else
+      throw new IllegalArgumentException("Either an attribute list or a group search base must be informed");
 
     if (groupRoleProvider == null) {
       info("Provided GroupRoleProvider was null. Group roles will therefore not be expanded");
@@ -144,34 +169,8 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
 
   @Override
   public Collection<? extends GrantedAuthority> getGrantedAuthorities(DirContextOperations userData, String username) {
-
-    Set<GrantedAuthority> authorities = new HashSet<>();
-    for (String attributeName : attributeNames) {
-      try {
-        String[] attributeValues = userData.getStringAttributes(attributeName);
-        // Should the attribute not be defined, the returned array is null
-        if (attributeValues != null) {
-          for (String attributeValue : attributeValues) {
-            // The attribute value may be a single authority (a single role) or a list of roles
-            addAuthorities(authorities, attributeValue.split(","));
-          }
-        } else {
-          debug("({}) Could not find any attribute named '{}' in user '{}'", attributeName, userData.getDn());
-        }
-      } catch (ClassCastException e) {
-        error("Specified attribute containing user roles ('{}') was not of expected type String: {}", attributeName, e);
-      }
-    }
-
-    // Add the list of additional roles
-    addAuthorities(authorities, additionalAuthorities);
-
-    if (logger.isDebugEnabled()) {
-      debug("Returning user {} with authorities:", username);
-      for (GrantedAuthority authority : authorities) {
-        logger.error("\t{}", authority);
-      }
-    }
+    logger.debug("userName: {}", username);
+    Collection<GrantedAuthority> authorities = getExpandedAuthorities(userData, username);
 
     // Update the user in the security service if it matches the user whose authorities are being returned
     if ((securityService.getOrganization().equals(organization))
@@ -190,6 +189,57 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
       securityService.setUser(user);
     }
 
+    return authorities;
+  }
+
+  public Collection<GrantedAuthority> getExpandedAuthorities(DirContextOperations userData, String username) {
+    logger.debug("userName: {}", username);
+    Set<GrantedAuthority> authorities = new HashSet<>();
+    for (String attributeName : attributeNames) {
+      try {
+        String[] attributeValues = userData.getStringAttributes(attributeName);
+        // Should the attribute not be defined, the returned array is null
+        if (attributeValues != null) {
+          for (String attributeValue : attributeValues) {
+            // The attribute value may be a single authority (a single role) or a list of roles
+            addAuthorities(authorities, attributeValue.split(","), true);
+          }
+        } else {
+          debug("({}) Could not find any attribute named '{}' in user '{}'", attributeName, userData.getDn());
+        }
+      } catch (ClassCastException e) {
+        error("Specified attribute containing user roles ('{}') was not of expected type String: {}", attributeName, e);
+      }
+    }
+
+    // #DCE OPC-66
+    if (defAuthPopulator != null) {
+      Thread currentThread = Thread.currentThread();
+      ClassLoader originalClassloader = currentThread.getContextClassLoader();
+      try {
+        currentThread.setContextClassLoader(LdapUserProviderFactory.class.getClassLoader());
+        logger.debug("Using defAuthPopulator");
+        Collection<GrantedAuthority> auths = defAuthPopulator.getGrantedAuthorities(userData, username);
+        if (!auths.isEmpty()) {
+          List<String> groupNames = new ArrayList<String>();
+          for (GrantedAuthority ga : auths)
+            groupNames.add(ga.getAuthority());
+          addAuthorities(authorities, groupNames.toArray(new String[groupNames.size()]), false);
+        }
+      } finally {
+        currentThread.setContextClassLoader(originalClassloader);
+      }
+    }
+
+    // Add the list of additional roles
+    addAuthorities(authorities, additionalAuthorities, false);
+
+    if (logger.isDebugEnabled()) {
+      debug("Returning user {} with authorities:", username);
+      for (GrantedAuthority authority : authorities) {
+        logger.error("\t{}", authority);
+      }
+    }
     return authorities;
   }
 
@@ -246,7 +296,7 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
    * @param values
    *          the values to add to the set
    */
-  private void addAuthorities(Set<GrantedAuthority> authorities, String[] values) {
+  private void addAuthorities(Set<GrantedAuthority> authorities, String[] values, boolean addPrefix) {
 
     if (values != null) {
       Organization org = securityService.getOrganization();
@@ -259,8 +309,8 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
         /*
          * Please note the prefix logic for roles:
          *
-         * - Roles that start with any of the "exclude prefixes" are left intact
-         * - In any other case, the "role prefix" is prepended to the roles read from LDAP
+         * - Roles that start with any of the "exclude prefixes" are left intact - In any other case, the "role prefix"
+         * is prepended to the roles read from LDAP
          *
          * This only applies to the prefix addition. The conversion to uppercase is independent from these
          * considerations
@@ -296,6 +346,8 @@ public class OpencastLdapAuthoritiesPopulator implements LdapAuthoritiesPopulato
               prefix = "";
           }
 
+          if (!addPrefix)
+            prefix = "";
           authority = (prefix + authority).replaceAll(ROLE_CLEAN_REGEXP, ROLE_CLEAN_REPLACEMENT);
 
           debug("Parsed LDAP role \"{}\" to role \"{}\"", value, authority);

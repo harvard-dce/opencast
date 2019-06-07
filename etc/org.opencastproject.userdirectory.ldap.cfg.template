@@ -67,3 +67,17 @@ org.opencastproject.userdirectory.ldap.uppercase=true
 ## The roles in this list are converted to uppercase if the corresponding parameter is set. However, the 'roleprefix'
 ## setting does not affect them -i.e. they will not be further modified even if 'roleprefix' is set.
 org.opencastproject.userdirectory.ldap.extra.roles=
+
+#####################
+### #DCE specific ###
+#####################
+
+## Base from where to search groups
+org.opencastproject.userdirectory.ldap.groupsearchbase=
+
+## Filter to search which groups the user belongs to
+org.opencastproject.userdirectory.ldap.groupsearchfilter=(memberUid={1})
+
+## Attribute that contains the user email
+org.opencastproject.userdirectory.ldap.useremail=mail
+

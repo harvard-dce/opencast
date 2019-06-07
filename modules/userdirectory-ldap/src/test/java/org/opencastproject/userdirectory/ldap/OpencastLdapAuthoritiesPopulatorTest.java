@@ -141,7 +141,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
   public void testNullAttributeNames() {
     try {
       new OpencastLdapAuthoritiesPopulator(null, DEFAULT_PREFIX, DEFAULT_EXCLUDE_PREFIXES, false, org, securityService,
-              groupRoleProvider, DEFAULT_EXTRA_ROLES);
+              groupRoleProvider, null, null, null, DEFAULT_EXTRA_ROLES);
     } catch (IllegalArgumentException e) {
       // OK
       return;
@@ -154,7 +154,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
   public void testEmptyAttributeNames() {
     try {
       new OpencastLdapAuthoritiesPopulator("", DEFAULT_PREFIX, DEFAULT_EXCLUDE_PREFIXES, false, org, securityService,
-              groupRoleProvider, DEFAULT_EXTRA_ROLES);
+              groupRoleProvider, null, null, null, DEFAULT_EXTRA_ROLES);
     } catch (IllegalArgumentException e) {
       // OK
       return;
@@ -167,7 +167,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
   public void testNullOrganization() {
     try {
       new OpencastLdapAuthoritiesPopulator(DEFAULT_STR_ATTRIBUTE_NAMES, DEFAULT_PREFIX, DEFAULT_EXCLUDE_PREFIXES, false,
-              null, securityService, groupRoleProvider, DEFAULT_EXTRA_ROLES);
+              null, securityService, groupRoleProvider, null, null, null, DEFAULT_EXTRA_ROLES);
     } catch (IllegalArgumentException e) {
       // OK
       return;
@@ -180,7 +180,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
   public void testNullSecurityService() {
     try {
       new OpencastLdapAuthoritiesPopulator(DEFAULT_STR_ATTRIBUTE_NAMES, DEFAULT_PREFIX, DEFAULT_EXCLUDE_PREFIXES, false,
-              org, null, groupRoleProvider, DEFAULT_EXTRA_ROLES);
+              org, null, groupRoleProvider, null, null, null, DEFAULT_EXTRA_ROLES);
     } catch (IllegalArgumentException e) {
       // OK
       return;
@@ -205,7 +205,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
           for (JpaGroupRoleProvider groupRoleProvider : groupRoleProviderTests) {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, org,
-                      securityService, groupRoleProvider, extraRoles);
+                      securityService, groupRoleProvider, null, null, null, extraRoles);
               doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
             }
           }
@@ -230,7 +230,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
           for (JpaGroupRoleProvider groupRoleProvider : groupRoleProviderTests) {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, org,
-                      securityService, groupRoleProvider, extraRoles);
+                      securityService, groupRoleProvider, null, null, null, extraRoles);
               doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
             }
           }
@@ -254,7 +254,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
           for (JpaGroupRoleProvider groupRoleProvider : groupRoleProviderTests) {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, org,
-                      securityService, groupRoleProvider, extraRoles);
+                      securityService, groupRoleProvider, null, null, null, extraRoles);
               doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
             }
           }
@@ -278,7 +278,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
           for (JpaGroupRoleProvider groupRoleProvider : groupRoleProviderTests) {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, org,
-                      securityService, groupRoleProvider, extraRoles);
+                      securityService, groupRoleProvider, null, null, null, extraRoles);
               doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
             }
           }
@@ -302,7 +302,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
           for (JpaGroupRoleProvider groupRoleProvider : groupRoleProviderTests) {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, org,
-                      securityService, groupRoleProvider, extraRoles);
+                      securityService, groupRoleProvider, null, null, null, extraRoles);
               doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
             }
           }
@@ -330,7 +330,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
           for (JpaGroupRoleProvider groupRoleProvider : groupRoleProviderTests) {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, org,
-                      securityService, groupRoleProvider, extraRoles);
+                      securityService, groupRoleProvider, null, null, null, extraRoles);
               doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
             }
           }
@@ -361,7 +361,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
           for (JpaGroupRoleProvider groupRoleProvider : groupRoleProviderTests) {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, org,
-                      securityService, groupRoleProvider, extraRoles);
+                      securityService, groupRoleProvider, null, null, null, extraRoles);
               doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
             }
           }
@@ -391,7 +391,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
             for (String[] extraRoles : EXTRA_ROLES_TESTS) {
               try {
                 populator = new OpencastLdapAuthoritiesPopulator(attributes, prefix, excludePrefixes, upper, otherOrg,
-                        securityService, groupRoleProvider, extraRoles);
+                        securityService, groupRoleProvider, null, null, null, extraRoles);
                 doTest(populator, mappings, prefix, excludePrefixes, upper, extraRoles, groupRoleProvider);
                 fail(format(
                         "Request came from a different organization (\"%s\") as the expected (\"%s\") but no exception was thrown",
@@ -443,7 +443,7 @@ public class OpencastLdapAuthoritiesPopulatorTest {
     }
 
     // Add the additional authorities
-    addRoles(expectedResult, rolePrefix, excludePrefixes, toUppercase, groupRoleProvider, org, additionalAuthorities);
+    addRoles(expectedResult, "", excludePrefixes, toUppercase, groupRoleProvider, org, additionalAuthorities);
 
     // Check the response is correct
     checkResponse(populator.getGrantedAuthorities(dirContextMock, USERNAME), expectedResult);

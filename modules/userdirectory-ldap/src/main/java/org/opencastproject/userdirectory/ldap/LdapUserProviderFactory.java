@@ -36,6 +36,7 @@ import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 
 import java.lang.management.ManagementFactory;
@@ -103,6 +104,11 @@ public class LdapUserProviderFactory implements ManagedServiceFactory {
   /** The key to indicate a comma-separated list of extra roles to add to the authenticated user */
   private static final String EXTRA_ROLES_KEY = "org.opencastproject.userdirectory.ldap.extra.roles";
 
+  /** #DCE OPC-66 Added new configuration **/
+  private static final String GROUP_SEARCH_BASE = "org.opencastproject.userdirectory.ldap.groupsearchbase";
+  private static final String GROUP_SEARCH_FILTER = "org.opencastproject.userdirectory.ldap.groupsearchfilter";
+  private static final String USER_EMAIL = "org.opencastproject.userdirectory.ldap.useremail";
+
   /** The key to setup a LDAP connection ID as an OSGI service property */
   private static final String INSTANCE_ID_SERVICE_PROPERTY_KEY = "instanceId";
 
@@ -146,7 +152,8 @@ public class LdapUserProviderFactory implements ManagedServiceFactory {
    *          the component context
    */
   public void activate(ComponentContext cc) {
-    logger.debug("Activate LdapUserProviderFactory");
+    // #DCE OPC-191
+    logger.info("Activating  {}", getClass().getName());
     bundleContext = cc.getBundleContext();
   }
 
@@ -187,6 +194,10 @@ public class LdapUserProviderFactory implements ManagedServiceFactory {
     String password = (String) properties.get(SEARCH_PASSWORD);
     String roleAttributes = (String) properties.get(ROLE_ATTRIBUTES_KEY);
     String rolePrefix = (String) properties.get(ROLE_PREFIX_KEY);
+    // #DCE Specific configuration
+    String emailAttr = (String) properties.get(USER_EMAIL);
+    String groupSearchFilter = (String) properties.get(GROUP_SEARCH_FILTER);
+    String groupSearchBase = (String) properties.get(GROUP_SEARCH_BASE);
 
     String[] excludePrefixes = null;
     String strExcludePrefixes = (String) properties.get(EXCLUDE_PREFIXES_KEY);
@@ -247,15 +258,40 @@ public class LdapUserProviderFactory implements ManagedServiceFactory {
     Hashtable<String, String> dict = new Hashtable<>();
     dict.put(INSTANCE_ID_SERVICE_PROPERTY_KEY, instanceId);
 
+    // #DCE OPC-66
+    DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(url);
+    if (StringUtils.isNotBlank(userDn)) {
+      contextSource.setPassword(password);
+      contextSource.setUserDn(userDn);
+      // Required so that authentication will actually be used
+      contextSource.setAnonymousReadOnly(false);
+    } else {
+      // No password set so try to connect anonymously.
+      contextSource.setAnonymousReadOnly(true);
+    }
+
+    try {
+      contextSource.afterPropertiesSet();
+    } catch (Exception e) {
+      throw new org.opencastproject.util.ConfigurationException("Unable to create a spring context source", e);
+    }
+
+    // #DCE OPC-66
+    OpencastLdapAuthoritiesPopulator authoritiesPopulator = new OpencastLdapAuthoritiesPopulator(roleAttributes,
+            rolePrefix, excludePrefixes, convertToUppercase, org, securityService, groupRoleProvider, contextSource,
+            groupSearchBase, groupSearchFilter, extraRoles);
+
+    logger.debug("Creating LdapUserProvider instance with pid=" + pid + ", and organization=" + organization
+            + ", to LDAP server at url:  " + url);
+
     // Instantiate this LDAP instance and register it as such
-    LdapUserProviderInstance provider = new LdapUserProviderInstance(pid, org, searchBase, searchFilter, url, userDn,
-            password, roleAttributes, rolePrefix, extraRoles, excludePrefixes, convertToUppercase, cacheSize,
-            cacheExpiration, securityService);
+    // #DCE OPC-66 Passing email attribute name
+    LdapUserProviderInstance provider = new LdapUserProviderInstance(contextSource, authoritiesPopulator, pid, org,
+            searchBase, searchFilter, roleAttributes,
+            rolePrefix, extraRoles, excludePrefixes, convertToUppercase, cacheSize,
+            cacheExpiration, securityService, emailAttr);
 
     providerRegistrations.put(pid, bundleContext.registerService(UserProvider.class.getName(), provider, null));
-
-    OpencastLdapAuthoritiesPopulator authoritiesPopulator = new OpencastLdapAuthoritiesPopulator(roleAttributes,
-            rolePrefix, excludePrefixes, convertToUppercase, org, securityService, groupRoleProvider, extraRoles);
 
     // Also, register this instance as LdapAuthoritiesPopulator so that it can be used within the security.xml file
     authoritiesPopulatorRegistrations.put(pid,

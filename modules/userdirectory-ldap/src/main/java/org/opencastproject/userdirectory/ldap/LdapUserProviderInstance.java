@@ -40,16 +40,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,6 +59,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.naming.InvalidNameException;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 
 /**
  * A UserProvider that reads user roles from LDAP entries.
@@ -102,6 +105,10 @@ public class LdapUserProviderInstance implements UserProvider, CachingUserProvid
   /** A Set of prefixes. When a role starts with any of these, the role prefix defined above will not be prepended */
   private Set<String> setExcludePrefixes = new HashSet<>();
 
+  // #DCE OPC-66 Now it's an instance variable
+  private String emailAttr;
+  private OpencastLdapAuthoritiesPopulator authoritiesPopulator;
+
   /**
    * Constructs an ldap user provider with the needed settings.
    *
@@ -137,78 +144,74 @@ public class LdapUserProviderInstance implements UserProvider, CachingUserProvid
    *          a reference to Opencast's security service
    */
   // CHECKSTYLE:OFF
-  LdapUserProviderInstance(String pid, Organization organization, String searchBase, String searchFilter, String url,
-          String userDn, String password, String roleAttributesGlob, String rolePrefix, String[] extraRoles,
+  LdapUserProviderInstance(DefaultSpringSecurityContextSource contextSource, OpencastLdapAuthoritiesPopulator populator,
+          String pid, Organization organization, String searchBase, String searchFilter, String roleAttributesGlob,
+          String rolePrefix, String[] extraRoles,
           String[] excludePrefixes, boolean convertToUppercase, int cacheSize, int cacheExpiration,
-          SecurityService securityService) {
+          SecurityService securityService, String emailAttr) {
     // CHECKSTYLE:ON
     this.organization = organization;
     this.securityService = securityService;
-    logger.debug("Creating LdapUserProvider instance with pid=" + pid + ", and organization=" + organization
-            + ", to LDAP server at url:  " + url);
+    this.authoritiesPopulator = populator;
 
-    DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(url);
-    if (StringUtils.isNotBlank(userDn)) {
-      contextSource.setPassword(password);
-      contextSource.setUserDn(userDn);
-      // Required so that authentication will actually be used
-      contextSource.setAnonymousReadOnly(false);
-    } else {
-      // No password set so try to connect anonymously.
-      contextSource.setAnonymousReadOnly(true);
-    }
+    // #DCE OPC-191
+    logger.info("Activating  {}", getClass().getName());
 
-    try {
-      contextSource.afterPropertiesSet();
-    } catch (Exception e) {
-      throw new org.opencastproject.util.ConfigurationException("Unable to create a spring context source", e);
-    }
     FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(searchBase, searchFilter, contextSource);
-    userSearch.setReturningAttributes(roleAttributesGlob.split(","));
+
+    // #DCE OPC-66 Also return email attribute
+    String[] roleAttrs = roleAttributesGlob.split(",");
+    String[] returnAttrs;
+    if (StringUtils.isNotBlank(emailAttr)) {
+      returnAttrs = Arrays.copyOf(roleAttrs, roleAttrs.length + 1);
+      returnAttrs[roleAttrs.length] = emailAttr.trim();
+      this.emailAttr = emailAttr.trim();
+    } else
+      returnAttrs = roleAttrs;
+    userSearch.setReturningAttributes(returnAttrs);
     delegate = new LdapUserDetailsService(userSearch);
 
-    if (StringUtils.isNotBlank(roleAttributesGlob)) {
-      LdapUserDetailsMapper mapper = new LdapUserDetailsMapper();
+    // #DCE OPC-66 Replace LdapUserDetailsMapper by ours
+    OpencastUserDetailsMapper mapper = new OpencastUserDetailsMapper();
 
-      mapper.setConvertToUpperCase(convertToUppercase);
+    mapper.setConvertToUpperCase(convertToUppercase);
 
-      mapper.setRoleAttributes(roleAttributesGlob.split(","));
+    mapper.setRoleAttributes(roleAttrs);
 
-      if (convertToUppercase)
-        this.rolePrefix = StringUtils.trimToEmpty(rolePrefix).toUpperCase();
-      else
-        this.rolePrefix = StringUtils.trimToEmpty(rolePrefix);
+    if (convertToUppercase)
+      this.rolePrefix = StringUtils.trimToEmpty(rolePrefix).toUpperCase();
+    else
+      this.rolePrefix = StringUtils.trimToEmpty(rolePrefix);
 
-      logger.debug("Role prefix set to: \"{}\"", this.rolePrefix);
+    logger.debug("Role prefix set to: \"{}\"", this.rolePrefix);
 
-      // The default prefix value is "ROLE_", so we must explicitly set it to "" by default
-      // Because of the parameters extraRoles and excludePrefixes, we must add the prefix manually
-      mapper.setRolePrefix("");
-      delegate.setUserDetailsMapper(mapper);
+    // The default prefix value is "ROLE_", so we must explicitly set it to "" by default
+    // Because of the parameters extraRoles and excludePrefixes, we must add the prefix manually
+    mapper.setRolePrefix("");
+    delegate.setUserDetailsMapper(mapper);
 
-      // Process the excludePrefixes if needed
-      if (!this.rolePrefix.isEmpty()) {
-        if (excludePrefixes != null) {
-          // "Clean" the list of exclude prefixes
-          for (String excludePrefix : excludePrefixes) {
-            String cleanPrefix = excludePrefix.trim();
-            if (!cleanPrefix.isEmpty()) {
-              if (convertToUppercase)
-                setExcludePrefixes.add(cleanPrefix.toUpperCase());
-              else
-                setExcludePrefixes.add(cleanPrefix);
-            }
+    // Process the excludePrefixes if needed
+    if (!this.rolePrefix.isEmpty()) {
+      if (excludePrefixes != null) {
+        // "Clean" the list of exclude prefixes
+        for (String excludePrefix : excludePrefixes) {
+          String cleanPrefix = excludePrefix.trim();
+          if (!cleanPrefix.isEmpty()) {
+            if (convertToUppercase)
+              setExcludePrefixes.add(cleanPrefix.toUpperCase());
+            else
+              setExcludePrefixes.add(cleanPrefix);
           }
+        }
 
-          if (logger.isDebugEnabled()) {
-            if (setExcludePrefixes.size() > 0) {
-              logger.debug("Exclude prefixes set to:");
-              for (String prefix : excludePrefixes) {
-                logger.debug("\t* {}", prefix);
-              }
-            } else {
-              logger.debug("No exclude prefixes defined");
+        if (logger.isDebugEnabled()) {
+          if (setExcludePrefixes.size() > 0) {
+            logger.debug("Exclude prefixes set to:");
+            for (String prefix : excludePrefixes) {
+              logger.debug("\t* {}", prefix);
             }
+          } else {
+            logger.debug("No exclude prefixes defined");
           }
         }
       }
@@ -234,6 +237,7 @@ public class LdapUserProviderInstance implements UserProvider, CachingUserProvid
               @Override
               public Object load(String id) throws Exception {
                 User user = loadUserFromLdap(id);
+                // Needed? cache.put(id, user);
                 return user == null ? nullToken : user;
               }
             });
@@ -286,7 +290,7 @@ public class LdapUserProviderInstance implements UserProvider, CachingUserProvid
    */
   @Override
   public User loadUser(String userName) {
-    logger.debug("LdapUserProvider is loading user " + userName);
+    logger.debug(Thread.currentThread().getId() + " - LdapUserProvider is loading user " + userName);
     requests.incrementAndGet();
     try {
       // use #getUnchecked since the loader does not throw any checked exceptions
@@ -299,6 +303,8 @@ public class LdapUserProviderInstance implements UserProvider, CachingUserProvid
     } catch (UncheckedExecutionException e) {
       logger.warn("Exception while loading user " + userName, e);
       return null;
+    } finally {
+      logger.debug(Thread.currentThread().getId() + " - LdapUserProvider returning user " + userName);
     }
   }
 
@@ -314,56 +320,56 @@ public class LdapUserProviderInstance implements UserProvider, CachingUserProvid
       throw new IllegalStateException("The LDAP user detail service has not yet been configured");
     }
     ldapLoads.incrementAndGet();
-    UserDetails userDetails = null;
+    OpencastUserDetails userDetails = null;
 
     Thread currentThread = Thread.currentThread();
     ClassLoader originalClassloader = currentThread.getContextClassLoader();
+    String userNameFromDn = userName;
     try {
       currentThread.setContextClassLoader(LdapUserProviderFactory.class.getClassLoader());
       try {
-        userDetails = delegate.loadUserByUsername(userName);
+        logger.debug("Loading user {} from ldap", userName);
+        userDetails = (OpencastUserDetails) delegate.loadUserByUsername(userName);
+        // #DCE OPC-83 Get the dn and set the user name to replace the HUID.
+        // This is necessary when authorizing producers that come via Canvas/LTI with their HUID, not ldap user name.
+        // dn is something like "uid=rsantos,ou=People,dc=dce,dc=harvard,dc=edu"
+        // If logging in via OC, user name is already the dn user name. If via Canvas/LTI, userName is the HUID and the
+        // user name returned in the User object will be the ldap user name.
+        try {
+          LdapName ldapName = new LdapName(userDetails.getDn());
+          List<Rdn> rdns = ldapName.getRdns();
+          userNameFromDn = rdns.get(rdns.size() - 1).getValue().toString();
+          logger.debug("Ldap dn is {}, user name is {}", userDetails.getDn(), userNameFromDn);
+        } catch (InvalidNameException e) {
+          logger.warn("Could not get user name from ldap dn, user is: {}", userName);
+        }
       } catch (UsernameNotFoundException e) {
         cache.put(userName, nullToken);
         return null;
       }
 
       JaxbOrganization jaxbOrganization = JaxbOrganization.fromOrganization(organization);
-
-      // Get the roles and add the extra roles
-      Collection<GrantedAuthority> authorities = new HashSet<>();
-      authorities.addAll(userDetails.getAuthorities());
-      authorities.addAll(setExtraRoles);
-
       Set<JaxbRole> roles = new HashSet<>();
-      if (authorities != null) {
-        /*
-         * Please note the prefix logic for roles:
-         *
-         * - Roles that start with any of the "exclude prefixes" are left intact
-         * - In any other case, the "role prefix" is prepended to the roles read from LDAP
-         *
-         * This only applies to the prefix addition. The conversion to uppercase is independent from these
-         * considerations
-         */
-        for (GrantedAuthority authority : authorities) {
-          String strAuthority = authority.getAuthority();
+      // #DCE OPC-66
+      // We don't set the authorities populator in the delegate LdapUserDetailsService to avoid a recursive load
+      for (GrantedAuthority authority : authoritiesPopulator.getExpandedAuthorities(userDetails.getCtx(),
+              userNameFromDn))
+        roles.add(new JaxbRole(authority.getAuthority(), jaxbOrganization));
 
-          boolean hasExcludePrefix = false;
-          for (String excludePrefix : setExcludePrefixes) {
-            if (strAuthority.startsWith(excludePrefix)) {
-              hasExcludePrefix = true;
-              break;
-            }
-          }
-          if (!hasExcludePrefix) {
-            strAuthority = rolePrefix + strAuthority;
-          }
-
-          // Finally, add the role itself
-          roles.add(new JaxbRole(strAuthority, jaxbOrganization));
+      // OPC-66 Add user email gotten from LDAP
+      String email = null;
+      if (StringUtils.isNotBlank(emailAttr)) {
+        try {
+          Attribute emailAttr = userDetails.getAttribute(this.emailAttr);
+          email = emailAttr.get().toString();
+        } catch (NamingException e) {
+          logger.warn("Could not get user email", e);
         }
       }
-      User user = new JaxbUser(userDetails.getUsername(), PROVIDER_NAME, jaxbOrganization, roles);
+
+      // #DCE OPC-66 Replaced constructor to pass email address
+      User user = new JaxbUser(userNameFromDn, null, null, email, PROVIDER_NAME, true, jaxbOrganization,
+              roles);
       cache.put(userName, user);
       return user;
     } finally {
@@ -428,4 +434,5 @@ public class LdapUserProviderInstance implements UserProvider, CachingUserProvid
   public void invalidate(String userName) {
     cache.invalidate(userName);
   }
+
 }
