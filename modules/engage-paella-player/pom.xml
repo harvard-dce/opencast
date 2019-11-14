@@ -12,11 +12,46 @@
   </parent>
   <properties>
     <opencast.basedir>${project.basedir}/../..</opencast.basedir>
+    <checkstyle.skip>false</checkstyle.skip>
   </properties>
-  <dependencies />
+
+  <dependencies>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- osgi support -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
   <profiles>
     <profile>
       <id>frontend-no-prebuilt</id>
+      <activation>
+          <activeByDefault>false</activeByDefault>
+          <property>
+            <name>devBuild-no-prebuilt</name>
+          </property>
+      </activation>
       <build>
         <plugins>
           <plugin>
@@ -38,7 +73,7 @@
                 </configuration>
               </execution>
               <execution>
-                <id>npm ci</id>
+                <id>npm install</id>
                 <goals>
                   <goal>exec</goal>
                 </goals>
@@ -46,21 +81,9 @@
                 <configuration>
                   <executable>npm</executable>
                   <arguments>
-                    <argument>ci</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-              <execution>
-                <id>esline</id>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <phase>validate</phase>
-                <configuration>
-                  <executable>npm</executable>
-                  <arguments>
-                    <argument>run</argument>
-                    <argument>eslint</argument>
+                    <argument>install</argument>
+                    <argument>--registry</argument>
+                    <argument>${nexus.npm}</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -73,7 +96,7 @@
                 <configuration>
                   <executable>node_modules/gulp/bin/gulp.js</executable>
                   <arguments>
-                    <argument>paella-opencast:build</argument>
+                    <argument>paella-opencast:build.dce</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -83,11 +106,13 @@
       </build>
     </profile>
 
-
     <profile>
       <id>frontend</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
+        <property>
+            <name>devBuild</name>
+        </property>
       </activation>
       <build>
         <plugins>
@@ -120,24 +145,12 @@
 
               <execution>
                 <phase>validate</phase>
-                <id>npm ci</id>
+                <id>npm install</id>
                 <goals>
                   <goal>npm</goal>
                 </goals>
-                <configuration>
-                  <arguments>ci</arguments>
-                </configuration>
               </execution>
-              <execution>
-                <phase>validate</phase>
-                <id>eslint</id>
-                <goals>
-                  <goal>npm</goal>
-                </goals>
-                <configuration>
-                  <arguments>run eslint</arguments>
-                </configuration>
-              </execution>
+
               <execution>
                 <phase>process-resources</phase>
                 <id>gulp build</id>
@@ -145,7 +158,7 @@
                   <goal>gulp</goal>
                 </goals>
                 <configuration>
-                  <arguments>paella-opencast:build</arguments>
+                  <arguments>paella-opencast:build.dce</arguments>
                 </configuration>
               </execution>
             </executions>
@@ -171,7 +184,8 @@
               <outputDirectory>${basedir}/target/classes/ui/</outputDirectory>
               <resources>
                 <resource>
-                  <directory>./target/gulp/paella-opencast</directory>
+                  <!-- #DCE the gulp built player code is saved to build/paella-opencast -->
+                  <directory>./build/paella-opencast</directory>
                   <includes>
                     <include>**</include>
                   </includes>
@@ -191,7 +205,9 @@
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Build-Number>${buildNumber}</Build-Number>
             <Private-Package>ui.*</Private-Package>
-            <Http-Alias>/paella/ui</Http-Alias>
+            <!-- #DCE changed alias path -->
+            <!-- Http-Alias>/paella/ui</Http-Alias -->
+            <Http-Alias>/engage/player</Http-Alias>
             <Http-Classpath>/ui</Http-Classpath>
             <Http-Welcome>watch.html</Http-Welcome>
           </instructions>

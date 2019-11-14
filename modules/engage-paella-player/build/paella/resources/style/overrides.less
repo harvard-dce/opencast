@@ -1,0 +1,17 @@
+body {
+  font-family: "Helvetica Neue", sans-serif;
+}
+
+/** #DCE for v5.2.5, override position of live indicator back to right side of screen */
+.liveIndicator {
+	z-index: 100;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+}
+
+/** #DCE OPC-389 override initial zindex of presenter player wrapper to show presenter thumb on load */
+#videoPlayerWrapper_0 {
+    z-index: 2;
+}
+
