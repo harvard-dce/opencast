@@ -5,7 +5,8 @@
 ---------------------
 1. "npm install"
 2. "gulp build"
-3. Open a browser and go to "http://127.0.0.1:3000/engage/player/watch.html?id=ee39049c-05f0-4d2b-94b4-625ce59f1b2b&logLevel=DEBUG"
+3. "gulp server"
+4.  Open a browser and go to "http://127.0.0.1:3000/engage/player/watch.html?id=ee39049c-05f0-4d2b-94b4-625ce59f1b2b&logLevel=DEBUG"
 
 ---------------------
 ---------------------
