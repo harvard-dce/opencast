@@ -2,18 +2,34 @@
   "name": "paella-opencast",
   "private": true,
   "scripts": {
-    "build": "gulp paella-opencast:build",
     "eslint": "eslint --config ../../docs/checkstyle/eslintrc.js src/main/paella-opencast/ gulpfile.js",
     "html-linter": "html-linter --config ../../docs/checkstyle/html-linter.json 'src/main/resources/**/*.html'"
   },
-  "devDependencies": {
-    "eslint": "^6.5.0",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dce-paella-extensions": "harvard-dce/dce-paella-extensions#t/OPC-400-upgradeOldMobileVideoTogglePlugin-622",
+    "eslint": "^6.1.0",
     "eslint-plugin-header": "^3.0.0",
-    "express": "^4.17.1",
     "gulp": "^4.0.2",
-    "http-errors": "^1.7.3",
-    "http-proxy": "^1.17.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-rename": "^1.4.0",
     "merge-stream": "^2.0.0",
-    "paellaplayer": "github:polimediaupv/paella#6.2.2"
+    "object-path-exists": "^1.0.0",
+    "paellaplayer": "github:polimediaupv/paella#6.2.2",
+    "serve-static": "^1.14.1"
+  },
+  "devDependencies": {
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "gulp-browserify": "^0.5.1",
+    "gulp-connect": "^5.7.0",
+    "gulp-live-server": "0.0.31",
+    "http": "0.0.0",
+    "http-proxy": "^1.16.2",
+    "https": "^1.0.0",
+    "jsonfile": "~2.2.1",
+    "smokestack": "^3.6.0",
+    "tap-closer": "~1.0.0",
+    "tape": "~4.4.0"
   }
 }

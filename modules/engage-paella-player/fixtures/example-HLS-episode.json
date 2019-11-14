@@ -1,0 +1,587 @@
+{
+    "search-results": {
+        "offset": "0",
+        "limit": "1",
+        "total": "1",
+        "searchTime": "1",
+        "query": "(id:e8d2d1ac\\-0185\\-45f5\\-950f\\-518e447ebabc) AND oc_organization:mh_default_org AND (oc_acl_read:ROLE_OAUTH_USER OR oc_acl_read:ROLE_SUDO OR oc_acl_read:ROLE_ADMIN OR oc_acl_read:ROLE_ANONYMOUS OR oc_acl_read:ROLE_USER_ADMIN OR oc_acl_read:ROLE_GROUP_MH_DEFAULT_ORG_SYSTEM_ADMINS OR oc_acl_read:ROLE_USER) AND -oc_mediatype:Series AND -oc_deleted:[* TO *]",
+        "result": {
+            "id": "e8d2d1ac-0185-45f5-950f-518e447ebabc",
+            "org": "mh_default_org",
+            "mediapackage": {
+                "duration": "95000",
+                "id": "e8d2d1ac-0185-45f5-950f-518e447ebabc",
+                "start": "2019-08-29T11:27:16Z",
+                "title": "HLS Test -2",
+                "series": 20190229998,
+                "seriestitle": "Test Spring 2019-29998",
+                "type": "L01",
+                "creators": {
+                    "creator": "Henry H. Smith"
+                },
+                "media": {
+                    "track": [
+                        {
+                            "id": "94bdb08b-e7da-40e9-a2b5-def8f8e16375",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "application/x-mpegURL",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/8509d515-c62f-4fac-8d6d-ea09598d16a2/5746_variant_2.m3u8",
+                            "size": 2407,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "371720796bbac45f2bea0f480ef66099"
+                            },
+                            "duration": 94000,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 127712
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 1726695,
+                                "framerate": 30,
+                                "resolution": "1440x810"
+                            },
+                            "live": false,
+                            "logicalname": "../8509d515-c62f-4fac-8d6d-ea09598d16a2/5746_variant_2.m3u8"
+                        },
+                        {
+                            "id": "48b5fc92-dabc-4129-b26a-bd067caf78b5",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "video/mp4",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "dce-threequarters-res-presenter-mp4",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/e85a5731-1e5e-4b81-9246-ee145148d769/5746_segment_2_presenter_med_30fps.mp4",
+                            "size": 25396949,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "94264da3059f19a6b8006d7eaac49a23"
+                            },
+                            "duration": 95621,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 128385
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 1966700,
+                                "framerate": 30,
+                                "resolution": "1440x810"
+                            },
+                            "live": false,
+                            "logicalname": "../e85a5731-1e5e-4b81-9246-ee145148d769/5746_segment_2_presenter_med_30fps.mp4"
+                        },
+                        {
+                            "id": "37b048ee-5e57-422f-82e7-6ae968aaa7e9",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "video/mp4",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "dce-quarter-res-presenter-mp4",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/717d4cc9-0114-44af-ac4c-fab74ac95e18/5746_segment_0_presenter_verylow_30fps.mp4",
+                            "size": 3207210,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "7c4cf49fa29f5a601087f33e6d8bfc77"
+                            },
+                            "duration": 95621,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 64333
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 196394,
+                                "framerate": 30,
+                                "resolution": "480x270"
+                            },
+                            "live": false,
+                            "logicalname": "../717d4cc9-0114-44af-ac4c-fab74ac95e18/5746_segment_0_presenter_verylow_30fps.mp4"
+                        },
+                        {
+                            "id": "734d7b64-cafb-4d47-8a87-43d901a6b8f7",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "video/mp4",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "dce-full-res-presenter-mp4",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/07d8b811-c4dd-4ae9-b615-c872a0468fa0/5746_segment_3_presenter_high_30fps.mp4",
+                            "size": 48537055,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "eb10eb0ab38825612d84ada4833ddc41"
+                            },
+                            "duration": 95621,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 128385
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 3784832,
+                                "framerate": 30,
+                                "resolution": "1920x1080"
+                            },
+                            "live": false,
+                            "logicalname": "../07d8b811-c4dd-4ae9-b615-c872a0468fa0/5746_segment_3_presenter_high_30fps.mp4"
+                        },
+                        {
+                            "id": "eef4dea4-9887-47c9-bedb-b81c9096981e",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "application/x-mpegURL",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/ace90752-12e6-45ed-a126-4ab6935ce59c/5746_variant_3.m3u8",
+                            "size": 2429,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "8ce03587e0f8514ff988edaf97dea0a6"
+                            },
+                            "duration": 95000,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 127599
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 3761516,
+                                "framerate": 30,
+                                "resolution": "1920x1080"
+                            },
+                            "live": false,
+                            "logicalname": "../ace90752-12e6-45ed-a126-4ab6935ce59c/5746_variant_3.m3u8"
+                        },
+                        {
+                            "id": "92c79fc0-49ad-4b3c-9eab-3f7ce9840c91",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "application/x-mpegURL",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/0fa0ae0d-edb1-4658-86e4-700ca4d1b3a1/5746_variant_0.m3u8",
+                            "size": 2447,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "8220266ef1e05f39ac9dfb6c57ee8362"
+                            },
+                            "duration": 95000,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 63825
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 167026,
+                                "framerate": 30,
+                                "resolution": "480x270"
+                            },
+                            "live": false,
+                            "logicalname": "../0fa0ae0d-edb1-4658-86e4-700ca4d1b3a1/5746_variant_0.m3u8"
+                        },
+                        {
+                            "id": "15ce6dd1-313b-43a9-bcbe-73b7c947a111",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "application/x-mpegURL",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/51607746-9459-4fd8-b673-98596da8bf53/5746_variant_1.m3u8",
+                            "size": 2384,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "f1d13bed542113817094a79d4a07ba08"
+                            },
+                            "duration": 94000,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 95946
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 512155,
+                                "framerate": 30,
+                                "resolution": "960x540"
+                            },
+                            "live": false,
+                            "logicalname": "../51607746-9459-4fd8-b673-98596da8bf53/5746_variant_1.m3u8"
+                        },
+                        {
+                            "id": "b1029bbf-f6a0-4620-ae46-a01cd7d0a04c",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "video/mp4",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "dce-half-res-presenter-mp4",
+                                    "engage",
+                                    "multiaudio"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/49dac702-9e9e-4230-b2d7-0be843145ef7/5746_segment_1_presenter_low_30fps.mp4",
+                            "size": 8330356,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "57526ba908632c626b0085425165bafb"
+                            },
+                            "duration": 95621,
+                            "audio": {
+                                "id": "audio-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "AAC (Advanced Audio Coding)"
+                                },
+                                "channels": 2,
+                                "samplingrate": 48000,
+                                "bitrate": 96395
+                            },
+                            "video": {
+                                "id": "video-1",
+                                "device": "",
+                                "encoder": {
+                                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                },
+                                "bitrate": 588209,
+                                "framerate": 30,
+                                "resolution": "960x540"
+                            },
+                            "live": false,
+                            "logicalname": "../49dac702-9e9e-4230-b2d7-0be843145ef7/5746_segment_1_presenter_low_30fps.mp4"
+                        },
+                        {
+                            "id": "6bba6f54-85d8-48dd-b782-3cd87f6ebbac",
+                            "type": "presenter/delivery",
+                            "ref": "track:390f5e9c-2428-4fdf-932a-9a79f994cfc0",
+                            "mimetype": "application/x-mpegURL",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage",
+                                    "multiaudio",
+                                    "multiencode-hls"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/eec4bcc4-c21e-4775-b78b-5c5d72d4dc41/OpenCast_Player_for_Students.m3u8",
+                            "size": 454,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "b8591d51f704220ec71e5a3e4d0e8288"
+                            },
+                            "duration": 95000,
+                            "audio": [
+                                {
+                                    "id": "audio-1",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "AAC (Advanced Audio Coding)"
+                                    },
+                                    "channels": 2,
+                                    "samplingrate": 48000,
+                                    "bitrate": 63825
+                                },
+                                {
+                                    "id": "audio-2",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "AAC (Advanced Audio Coding)"
+                                    },
+                                    "channels": 2,
+                                    "samplingrate": 48000,
+                                    "bitrate": 95946
+                                },
+                                {
+                                    "id": "audio-3",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "AAC (Advanced Audio Coding)"
+                                    },
+                                    "channels": 2,
+                                    "samplingrate": 48000,
+                                    "bitrate": 127712
+                                },
+                                {
+                                    "id": "audio-4",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "AAC (Advanced Audio Coding)"
+                                    },
+                                    "channels": 2,
+                                    "samplingrate": 48000,
+                                    "bitrate": 127599
+                                }
+                            ],
+                            "video": [
+                                {
+                                    "id": "video-1",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                    },
+                                    "bitrate": 167026,
+                                    "framerate": 30,
+                                    "resolution": "480x270"
+                                },
+                                {
+                                    "id": "video-2",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                    },
+                                    "bitrate": 512155,
+                                    "framerate": 30,
+                                    "resolution": "960x540"
+                                },
+                                {
+                                    "id": "video-3",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                    },
+                                    "bitrate": 1726695,
+                                    "framerate": 30,
+                                    "resolution": "1440x810"
+                                },
+                                {
+                                    "id": "video-4",
+                                    "device": "",
+                                    "encoder": {
+                                        "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10"
+                                    },
+                                    "bitrate": 3761516,
+                                    "framerate": 30,
+                                    "resolution": "1920x1080"
+                                }
+                            ],
+                            "live": false,
+                            "master": true,
+                            "logicalname": "../eec4bcc4-c21e-4775-b78b-5c5d72d4dc41/OpenCast_Player_for_Students.m3u8"
+                        }
+                    ]
+                },
+                "metadata": {
+                    "catalog": [
+                        {
+                            "id": "a75431c8-4766-4423-ada6-daab03745788",
+                            "type": "dublincore/series",
+                            "mimetype": "text/xml",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/0c30bd4c-942d-478d-9d21-40896a0215e9/dublincore.xml",
+                            "checksum": {
+                                "type": "md5",
+                                "$": "da3bd3c748b99e8a2e23b8aa515ca58d"
+                            }
+                        },
+                        {
+                            "id": "ddfdbc81-2b68-4325-9760-6d420b53218a",
+                            "type": "dublincore/episode",
+                            "mimetype": "text/xml",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/4460b2aa-e4d4-43a4-9b07-1c9e784f5eaa/dublincore.xml",
+                            "checksum": {
+                                "type": "md5",
+                                "$": "6ca5262a22fb693e8e2330f3bcd6e720"
+                            }
+                        }
+                    ]
+                },
+                "attachments": {
+                    "attachment": [
+                        {
+                            "id": "d0bd135f-1f99-4002-9731-03ed0221d417",
+                            "type": "security/xacml+episode",
+                            "mimetype": "text/xml",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/security-policy-episode/xacml.xml",
+                            "size": 0
+                        },
+                        {
+                            "id": "16383e16-d473-4cac-9669-d571747cf488",
+                            "type": "security/xacml+series",
+                            "mimetype": "text/xml",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/security-policy-series/xacml.xml",
+                            "size": 0,
+                            "checksum": {
+                                "type": "md5",
+                                "$": "b3a472595ed69aed346672c565290238"
+                            }
+                        },
+                        {
+                            "id": "078a8f36-99e0-408a-bc45-43c5acdf7d7d",
+                            "type": "presenter/search+preview",
+                            "ref": "track:734d7b64-cafb-4d47-8a87-43d901a6b8f7",
+                            "mimetype": "image/jpeg",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/attachment-4/5746_segment_3_presenter_high_30fps_15_000s_search.jpg",
+                            "size": 0
+                        },
+                        {
+                            "id": "e4f5984b-085a-4048-a292-521676a497eb",
+                            "type": "presenter/player+preview",
+                            "ref": "track:734d7b64-cafb-4d47-8a87-43d901a6b8f7",
+                            "mimetype": "image/jpeg",
+                            "tags": {
+                                "tag": [
+                                    "archive",
+                                    "engage"
+                                ]
+                            },
+                            "url": "http://10.10.10.50/static/mh_default_org/engage-player/e8d2d1ac-0185-45f5-950f-518e447ebabc/attachment-5/5746_segment_3_presenter_high_30fps_15_000s_player.jpg",
+                            "size": 0
+                        }
+                    ]
+                },
+                "publications": ""
+            },
+            "dcExtent": 101824,
+            "dcTitle": "HLS Test-2",
+            "dcCreator": "Henry H. Smith",
+            "dcPublisher": "bjones",
+            "dcCreated": "2019-08-29T07:27:16-04:00",
+            "dcIsPartOf": 20190229998,
+            "dcType": "L01",
+            "mediaType": "AudioVisual",
+            "keywords": "",
+            "modified": "2019-08-29T11:58:52.476-04:00",
+            "score": 0.3365227
+        }
+    }
+}
