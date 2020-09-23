@@ -105,7 +105,7 @@ public class SearchRestService extends AbstractJobProducerEndpoint {
   @Produces(MediaType.APPLICATION_XML)
   @RestQuery(name = "add", description = "Adds a mediapackage to the search index.",
     restParameters = {
-      @RestParameter(description = "The media package to add to the search index.", isRequired = true, name = "mediapackage", type = RestParameter.Type.TEXT, defaultValue = SAMPLE_MEDIA_PACKAGE)
+      @RestParameter(description = "The XML representation of a mediapackage to add to the search index.", isRequired = true, name = "mediapackage", type = RestParameter.Type.TEXT, defaultValue = SAMPLE_MEDIA_PACKAGE, jaxbClass = MediaPackageImpl.class)
     }, reponses = {
       @RestResponse(description = "XML encoded receipt is returned", responseCode = HttpServletResponse.SC_OK),
       @RestResponse(description = "There has been an internal error and the mediapackage could not be added", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "The job receipt")
