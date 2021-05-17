@@ -1,13 +1,3 @@
-Opencast 11: Release Notes
-=========================
-
-Features
---------
-- New *select-version* workflow operation handler, used to replace the media package in the currently
-  running workflow with an older version from the asset manager.
-
-
-
 Opencast 10: Release Notes
 =========================
 
