@@ -174,6 +174,68 @@ __Example__
 ]
 ```
 
+### POST /api/events/scheduleByCatalog
+
+Creates an event by sending a single DublinCore Catalog. Opencast metadata, access control list, processing instructions and files are constructed from the catalog metadata, associated series and organizational defaults.
+
+__Additional Notes__
+Response codes are the same as POST /api/events/
+
+__Example__
+POST body content
+
+```
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dublincore
+    xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dcterms:title>
+        Lecture 2: Intro to IT
+    </dcterms:title>
+   <dcterms:isPartOf>
+        CSCIE101-2021-02-29999
+    </dcterms:isPartOf>
+    <dcterms:spatial>
+        12StorySt-Studio1
+    </dcterms:spatial>
+    <dcterms:temporal
+         xsi:type=“dcterms:Period”>
+         start=2021-04-24T18:26:00Z;
+         end=2021-04-24T19:45:00Z;
+         scheme=W3C-DTF;
+    </dcterms:temporal>
+</dublincore>
+```
+
+### PUT /api/events/scheduleByCatalog/{event_id}
+
+Update an event schedule by sending the updated fields in the catalog.
+
+__Additional Notes__
+Response codes are the same as POST /api/events/{event_id}
+
+__Example__
+PUT body content to update only the event technical start and end time
+
+```
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dublincore
+    xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dcterms:identifier>
+        112233-abab-23232323
+    </dcterms:identifier>
+    <dcterms:temporal
+         xsi:type=“dcterms:Period”>
+         start=2021-04-24T19:26:00Z;
+         end=2021-04-24T20:45:00Z;
+         scheme=W3C-DTF;
+    </dcterms:temporal>
+</dublincore>
+```
+
 ### POST /api/events
 
 Creates an event by sending metadata, access control list, processing instructions and files in a [multipart request](http://www.w3.org/Protocols/rfc1341/7_2_Multipart.html).
